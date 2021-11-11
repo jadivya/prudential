@@ -1,0 +1,57 @@
+
+---
+- name: playbook for Change TTL to a SNAP
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - connection.yml
+
+  vars:
+    host: "test1"
+
+  collections:
+    - dellemc.powermax 
+
+  tasks:
+
+    - name:  Validation of masking view existance
+      block:
+        - name: Validation of masking view existance
+          dellemc_powermax_maskingview:
+            unispherehost: "{{unispherehost}}"
+            universion: "{{universion}}"
+            verifycert: "{{verifycert}}"
+            user: "{{user}}"
+            password: "{{password}}"
+            serial_no: "{{serial_no}}"
+          # mv_name: "Test37_View"
+            portgroup_name: "{{ host }}_PG"
+            host_name: "{{ host }}"
+            sg_name: "{{ host }}_SG"
+            state: "present"  
+    
+      rescue:
+        - debug:
+            msg: "Masking view doesn't exist"
+        - meta: end_play
+
+ 
+    - name: Gathering  masking view details
+      dellemc_powermax_maskingview:
+        unispherehost: "{{unispherehost}}"
+        universion: "{{universion}}"
+        verifycert: "{{verifycert}}"
+        user: "{{user}}"
+        password: "{{password}}"
+        serial_no: "{{serial_no}}"
+        # mv_name: "Test37_View"
+        portgroup_name: "{{ host }}_PG"
+        host_name: "{{ host }}"
+        sg_name: "{{ host }}_SG"
+        state: "present"  
+        register: response_1
+
+    - name: printing device information 
+      debug:
+        var: "{{ response_1 }}"" 

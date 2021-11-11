@@ -1,0 +1,33 @@
+
+---
+- name: playbook for Change TTL to a SNAP
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - connection.yml
+
+  vars:
+    host: "test1"
+    mv_name: "" 
+
+  collections:
+    - dellemc.powermax
+
+  tasks:
+   
+  - name: Delete host masking view
+    dellemc_powermax_maskingview:
+      unispherehost: "{{unispherehost}}"
+      universion: "{{universion}}"
+      verifycert: "{{verifycert}}"
+      user: "{{user}}"
+      password: "{{password}}"
+      serial_no: "{{serial_no}}"
+      mv_name: "test1_mv"
+      state: "absent"
+    register: response
+
+  - name: Getting response for deletion 
+    debug:
+      msg: "{{  response }}"

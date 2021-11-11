@@ -1,0 +1,76 @@
+
+---
+- name: playbook for Deleting a SNAP
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - connection.yml
+  vars:
+    host: "test1"
+    snap_id:
+
+  collections:
+    - dellemc.powermax
+
+  tasks:
+
+  - name:  Validation of snap existance
+    block:
+      - name: Validation of snap existance
+        dellemc_powermax_snapshot:
+          unispherehost: "{{unispherehost}}"
+          universion: "{{universion}}"
+          verifycert: "{{verifycert}}"
+          user: "{{user}}"
+          password: "{{password}}"
+          serial_no: "{{serial_no}}"
+          sg_name: "{{ host }}_SG"
+          snapshot_name: "{{ host }}_SG_snap"
+          state: "present"  
+        register: response_1 
+
+    rescue:
+      - debug:
+          msg: "snapshot doesn't exist"
+      - meta: end_play
+
+  - name: Gathering  snapid  details
+      dellemc_powermax_maskingview:
+        unispherehost: "{{unispherehost}}"
+        universion: "{{universion}}"
+        verifycert: "{{verifycert}}"
+        user: "{{user}}"
+        password: "{{password}}"
+        serial_no: "{{serial_no}}"
+        sg_name: "{{ host }}_SG"
+        snapshot_name: "{{ host }}_SG_snap"
+        state: "present"  
+        register: response_1
+
+
+  - name: Delete a Snapshot using snapshot_id
+    dellemc_powermax_snapshot:
+      unispherehost: "{{unispherehost}}"
+      universion: "{{universion}}"
+      verifycert: "{{verifycert}}"
+      user: "{{user}}"
+      password: "{{password}}"
+      serial_no: "{{serial_no}}"
+      sg_name: "{{ host }}_SG"
+      snapshot_name: "{{ host }}_SG_snap"
+      snapshot_id: "{{ snap_id }}" 
+      state: "absent"
+    register: response
+    
+
+  - name: printing device information 
+    debug:
+     var: response.delete_sg_snap  
+
+#   - name: validating Deleting of snapshot
+#     assert:
+#       that:
+#         -  'response.delete_sg_snap == "false"'
+#       fail_msg: "Failed to delete snapshot"
+#       success_msg: "snapshot deleted succesfully"
